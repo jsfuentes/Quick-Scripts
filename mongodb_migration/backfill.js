@@ -1,48 +1,39 @@
 const utils = require("./utils.js");
 
+const COLLECTION = "videos";
+
 ///////////////////////
 //EDIT updateDoc to determine how to update
 //////////////////////
 function updateDoc(d) {
-  let newWins = {};
-  let newFails = {};
-  d.fails.forEach(f => {
-    const key = Object.keys(f)[0];
-    const v = f[key];
-    newFails[key] = v;
-  });
+  if (d.s3_url) {
+    d.mux_asset_url = d.s3_url;
+  }
 
-  d.wins.forEach(w => {
-    const key = Object.keys(w)[0];
-    const v = w[key];
-    newWins[key] = v;
-  });
-
-  return { wins: newWins, fails: newFails };
+  return d;
 }
 
-async function testBackfill(company) {
+const TEST_QUERY = {
+  filename: "5e573491e97d08453fe089c1/2020-02-27T03:23:16.638Z-video.webm"
+};
+async function testBackfill() {
   const secrets = await utils.readSecrets();
-  const dbData = await utils.connectToData(secrets);
+  const dbData = await utils.connectToDB(secrets, COLLECTION);
 
-  const query = { company: company };
-  let companyDoc = await dbData.find(query).toArray();
-  companyDoc.forEach(d => {
-    const newDoc = updateDoc(d);
-    dbData.updateOne(query, { $set: newDoc });
-  });
+  let doc = await dbData.findOne(TEST_QUERY);
+  const newDoc = updateDoc(doc);
+  dbData.updateOne(TEST_QUERY, { $set: newDoc });
 
-  console.log("Backfill of", company, "complete");
+  console.log("Backfill of", doc, "complete");
 }
 
 async function backfillAll() {
   const secrets = await utils.readSecrets();
-  const dbData = await utils.connectToData(secrets);
-  // const dbSanitizedData = await utils.connectToSanitizedData(secrets);
+  const dbData = await utils.connectToDB(secrets, COLLECTION);
 
-  let companyDoc = await dbData.find().toArray();
-  companyDoc.forEach(d => {
-    const query = { company: d["company"] };
+  let docs = await dbData.find().toArray();
+  docs.forEach(d => {
+    const query = { _id: d._id };
     const newDoc = updateDoc(d);
     dbData.updateOne(query, { $set: newDoc });
   });
@@ -50,5 +41,5 @@ async function backfillAll() {
   console.log("Backfill All complete");
 }
 
-// testBackfill('medium');
+// testBackfill();
 backfillAll();

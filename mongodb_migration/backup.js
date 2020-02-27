@@ -12,10 +12,11 @@ function addDateToDoc(d) {
 
 async function backup() {
   const secrets = await utils.readSecrets();
-  const dbData = await utils.connectToData(secrets);
+  const dbVideos = await utils.connectToVideos(secrets);
   const dbBackup = await utils.connectToBackup(secrets);
 
-  let companyDoc = await dbData.find().toArray();
+  let companyDoc = await dbVideos.find().toArray();
+  console.log("Company Doc", companyDoc);
   companyDoc.forEach(d => {
     delete d["_id"]; //need unique ids, and we want multiple versions in the same db
     dbBackup.insertOne(addDateToDoc(d));

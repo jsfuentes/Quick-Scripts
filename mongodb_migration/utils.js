@@ -2,6 +2,15 @@ const fs = require("fs"),
   MongoClient = require("mongodb").MongoClient,
   util = require("util");
 
+module.exports = {
+  delay,
+  randomDelay,
+  readSecrets,
+  connectToDB,
+  connectToVideos,
+  connectToBackup
+};
+
 function delay(timeout) {
   return new Promise(resolve => {
     setTimeout(resolve, timeout);
@@ -23,36 +32,19 @@ async function readSecrets() {
 
 async function connectToDB(secrets, name) {
   const db = await MongoClient.connect(secrets["db_uri"], {
-    useNewUrlParser: true
+    useNewUrlParser: true,
+    useUnifiedTopology: true
   });
 
-  const dbo = db.db("companies");
+  const dbo = db.db("sigma");
   return dbo.collection(name);
 }
 
 //YES I AM NO COMBINING THESE FUNCTION, WHY? YOU WOULD HAVE TO MAKE A CONSTANT RIGHT, WELL THE CONSTANT IS THIS FUNCTION. DRY ISNT GOD
-async function connectToData(secrets) {
-  return connectToDB(secrets, "data");
-}
-
-async function connectToSanitizedData(secrets) {
-  return connectToDB(secrets, "sanitized_data");
+async function connectToVideos(secrets) {
+  return connectToDB(secrets, "videos");
 }
 
 async function connectToBackup(secrets) {
   return connectToDB(secrets, "backup");
 }
-
-function moneyToNumber(moneyStr) {
-  return parseInt(moneyStr.replace(/[^0-9.-]+/g, ""));
-}
-
-module.exports = {
-  delay,
-  randomDelay,
-  readSecrets,
-  connectToData,
-  connectToSanitizedData,
-  connectToBackup,
-  moneyToNumber
-};
