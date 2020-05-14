@@ -1,4 +1,6 @@
 const utils = require("./utils.js");
+const ObjectID = require("mongodb").ObjectID;
+const nanoid = require("nanoid");
 
 const COLLECTION = "videos";
 
@@ -14,7 +16,8 @@ function updateDoc(d) {
 }
 
 const TEST_QUERY = {
-  filename: "5e573491e97d08453fe089c1/2020-02-27T03:23:16.638Z-video.webm"
+  // _id: new ObjectID("jip_JBFj0GX")
+  _id: "jip_JBFj0GX"
 };
 async function testBackfill() {
   const secrets = await utils.readSecrets();
@@ -41,5 +44,34 @@ async function backfillAll() {
   console.log("Backfill All complete");
 }
 
+async function testObjectToString() {
+  const secrets = await utils.readSecrets();
+  const dbData = await utils.connectToDB(secrets, COLLECTION);
+
+  console.log(TEST_QUERY);
+  let doc = await dbData.findOne(TEST_QUERY);
+  console.log(doc);
+  delete doc._id;
+  doc._id = nanoid(11);
+  await dbData.deleteOne(TEST_QUERY);
+  await dbData.insertOne(doc);
+}
+
+async function objectIDToString() {
+  const secrets = await utils.readSecrets();
+  const dbData = await utils.connectToDB(secrets, COLLECTION);
+
+  let docs = await dbData.find().toArray();
+  docs.forEach(doc => {
+    dbData.deleteOne({ _id: doc._id });
+    delete doc._id;
+    doc._id = nanoid(11);
+    dbData.insertOne(doc);
+    console.log(doc);
+  });
+}
+
 // testBackfill();
-backfillAll();
+// backfillAll();
+// testObjectToString();
+objectIDToString();

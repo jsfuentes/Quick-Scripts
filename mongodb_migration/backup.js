@@ -1,5 +1,7 @@
 const utils = require("./utils.js");
 
+const COLLECTION_TO_BACKUP = "videos";
+
 function addDateToDoc(d) {
   var date = new Date();
 
@@ -12,10 +14,10 @@ function addDateToDoc(d) {
 
 async function backup() {
   const secrets = await utils.readSecrets();
-  const dbVideos = await utils.connectToVideos(secrets);
+  const dbCol = await utils.connectToDB(secrets, COLLECTION_TO_BACKUP);
   const dbBackup = await utils.connectToBackup(secrets);
 
-  let companyDoc = await dbVideos.find().toArray();
+  let companyDoc = await dbCol.find().toArray();
   console.log("Company Doc", companyDoc);
   companyDoc.forEach(d => {
     delete d["_id"]; //need unique ids, and we want multiple versions in the same db
