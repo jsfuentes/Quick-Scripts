@@ -1,31 +1,22 @@
 name = "Express Router Boilerplate"
 prefix = "myroute"
-code = """const express = require("express");
-const debug = require("debug")("app:routes:folder");
+code = """import React from "react";
+const debug = require("debug")("app:FormWithHeader");
 
-const Folder = require("../models/Folder.js");
-const asyncH = require("../utils/asyncHandler.js");
-
-let router = express.Router();
-
-router.get("/", asyncH(getFolder));
-router.post("/", asyncH(postFolder));
-
-//Returns all users rn
-async function getFolder(req, res) {
-  const f = await Folder.find().exec();
-  debug(f, typeof f);
-  res.json(f);
+interface FormWithHeaderProps {
+  event: SlingShowEvent;
+  onlyShowOnEditPath?: boolean;
+  afterSave?: ((newEvent: SlingShowEvent) => Promise<void>) | null;
+  isCreate?: boolean;
+  onClose?: () => void;
+  onJoin?: () => void;
+  insideSession: boolean;
 }
 
-async function postFolder(req, res) {
-  debug("Post", req.body);
-  const newFolder = new Folder(req.body);
-  const folder = await newFolder.save();
-  res.json(folder);
+export default function FormWithHeader(props: FormWithHeaderProps) {
+  return <div></div>;
 }
-
-module.exports = router;"""
+"""
 
 def cleanLine(l):
   newL = "\t\t\""
