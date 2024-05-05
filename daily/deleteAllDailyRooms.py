@@ -1,5 +1,4 @@
 import requests
-
 import json
 
 secretsF = open("./secrets.json", "r")
